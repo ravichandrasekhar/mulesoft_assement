@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="75f8b7f9-686a-4592-b01b-b01555c3d63f" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="57aa374c-18dd-488d-8e45-e3b0d0aae1ef" >
+		<http:request-connection protocol="HTTPS" host="api.openweathermap.org" />
+	</http:request-config>
+	<flow name="dataweavetask27-12-2021Flow" doc:id="2a2ea70b-203a-4a3b-a5f6-550cafa54170" >
+		<http:listener doc:name="Listener" doc:id="2f7425a9-4e6f-4279-821f-42beacbe58e4" config-ref="HTTP_Listener_config" path="/jsontoxml"/>
+		<http:request method="GET" doc:name="Request" doc:id="9455ff16-b0b2-459d-9f10-bc175a822ddf" config-ref="HTTP_Request_configuration" path="/data/2.5/weather">
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"appid" : "34d879c001a2b15f292786d65c67c078",
+	q : "London"
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="12e88225-db1c-43a1-9f10-d41b3f5fc236" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

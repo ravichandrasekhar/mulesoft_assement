@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="e1f56262-b8e5-4951-b008-c4f6476aa972" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="dataweavetask28-12-2021Flow" doc:id="9f526429-8e52-4992-8802-1d3e835195c3" >
+		<http:listener doc:name="Listener" doc:id="4ec7a649-6283-4827-9bfc-8fe21b3d6a5c" config-ref="HTTP_Listener_config" path="/groupby1"/>
+		<ee:transform doc:name="Transform Message" doc:id="542a0a22-e8d6-4c4f-94a9-4e23d1be3c96" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload groupBy (item,index) -> item.language]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="dataweavetask28-12-2021Flow1" doc:id="2c2a7c36-12ba-4689-aa96-6d82efade979" >
+		<http:listener doc:name="Listener" doc:id="8a2f989d-77ec-463c-94f2-a5ddd654766e" config-ref="HTTP_Listener_config" path="/groupby2"/>
+		<ee:transform doc:name="Transform Message" doc:id="eb7e0334-c6a1-4dd8-9d00-c4c16909d7d8" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+var myVar = { menu: {
+    header: "Move Items",
+    items: [
+        {"id": "internal"},
+        {"id": "left", "label": "Move Left"},
+        {"id": "right", "label": "Move Right"},
+        {"id": "up", "label": "Move Up"},
+        {"id": "down", "label": "Move Down"}
+    ]
+}}
+output application/json
+---
+(myVar.menu.items.label) groupBy("myLabels")]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="dataweavetask28-12-2021Flow2" doc:id="58f59205-473a-4075-bc39-4fe106c3ffa7" >
+		<http:listener doc:name="Listener" doc:id="874cee79-ada6-4246-93ad-d7c66d8a0f20" config-ref="HTTP_Listener_config" path="/mapobject1"/>
+		<ee:transform doc:name="Transform Message" doc:id="821e85bf-3ea1-4941-ad75-46333794e75d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+---
+{
+    prices: payload.prices mapObject ((value, key, index) -> {
+        (key): (value + 5) as Number {format: "##.00"}
+    })
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="dataweavetask28-12-2021Flow3" doc:id="5c0a85da-b181-4e35-b284-7aa692e73924" >
+		<http:listener doc:name="Listener" doc:id="91504de0-a6b3-4f70-8ed2-ceb2b7697675" config-ref="HTTP_Listener_config" path="/mapobject2"/>
+		<ee:transform doc:name="Transform Message" doc:id="d86523c3-e64a-463f-8432-65313dc98826" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload mapObject ((value, key, index) ->{
+    element:{
+        "index": index,
+        "key" : key,
+        "value": value
+    }
+} )]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="dataweavetask28-12-2021Flow4" doc:id="eb7a0833-4f38-40f0-b9bb-e1e47de6da18" >
+		<http:listener doc:name="Listener" doc:id="c4bc504e-5c24-4d1d-8097-d65eddf4b349" config-ref="HTTP_Listener_config" path="/map1"/>
+		<ee:transform doc:name="Transform Message" doc:id="1ed788ab-c60a-48c0-ad8e-d80e44336878" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.myns.bookstore.*book map{
+    title: $["title"],
+    author: $["author"],
+    year: $.year,
+    price:$.price
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="dataweavetask28-12-2021Flow5" doc:id="e72717e8-0bf6-4842-a585-fdf303bbed80" >
+		<http:listener doc:name="Listener" doc:id="7807a065-dec7-42b3-9229-ed825c14590c" config-ref="HTTP_Listener_config" path="/map2"/>
+		<ee:transform doc:name="Transform Message" doc:id="53f2587a-20d6-4a84-9acd-b650e9b95dbf" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.myns.bookstore.*book map{
+    title: $["title"],
+    author: $["author"],
+    year: $.year,
+    price:$.price,
+    category: $.@category
+}
+
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="dataweavetask28-12-2021Flow6" doc:id="8148004d-8a95-40b9-bc72-c5eecaa08cb6" >
+		<http:listener doc:name="Listener" doc:id="ce10f72b-389d-4bd1-9478-3dddfbd7ad20" config-ref="HTTP_Listener_config" path="/map3"/>
+		<ee:transform doc:name="Transform Message" doc:id="2f9153b2-72f7-43b4-95e4-1bbcdd656e0b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map{
+    "value": $ +1,
+    "index" : $$
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
